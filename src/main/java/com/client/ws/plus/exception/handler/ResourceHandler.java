@@ -1,16 +1,60 @@
 package com.client.ws.plus.exception.handler;
 
+import com.client.ws.plus.dto.error.ErrorResponseDto;
+import com.client.ws.plus.exception.BadRequestException;
 import com.client.ws.plus.exception.NotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class ResourceHandler {
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    public ResponseEntity<ErrorResponseDto> handleNotFoundException(NotFoundException n) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponseDto.builder()
+                .message(n.getMessage())
+                .httpStatus(HttpStatus.NOT_FOUND)
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .build());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponseDto> handleBadRequestException(BadRequestException b) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponseDto.builder()
+                .message(b.getMessage())
+                .httpStatus(HttpStatus.BAD_REQUEST)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .build());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDto> handleBadRequestException(MethodArgumentNotValidException m) {
+        Map<String, String> messages = new HashMap<>();
+        m.getBindingResult().getAllErrors().forEach(error -> messages.put(((FieldError) error).getField(), error.getDefaultMessage()));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponseDto.builder()
+                .message(Arrays.toString(messages.entrySet().toArray()))
+                .httpStatus(HttpStatus.BAD_REQUEST)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .build()
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDto> badRequestException(DataIntegrityViolationException d) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponseDto.builder()
+                .message(d.getMessage())
+                .httpStatus(HttpStatus.BAD_REQUEST)
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .build());
     }
 }

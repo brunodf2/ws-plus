@@ -3,6 +3,7 @@ package com.client.ws.plus.controller;
 import com.client.ws.plus.dto.SubscriptionTypeDto;
 import com.client.ws.plus.model.SubscriptionType;
 import com.client.ws.plus.service.SubscriptionTypeService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,7 @@ public class SubscriptionTypeController {
 
     @GetMapping
     public ResponseEntity<List<SubscriptionType>> findAll() {
-        List<SubscriptionType> response = subscriptionTypeService.findAll();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(subscriptionTypeService.findAll());
     }
 
     @GetMapping("/{id}")
@@ -29,8 +29,19 @@ public class SubscriptionTypeController {
     }
 
     @PostMapping
-    public ResponseEntity<SubscriptionType> create(@RequestBody SubscriptionTypeDto subscriptionTypeDto) {
+    public ResponseEntity<SubscriptionType> create(@Valid @RequestBody SubscriptionTypeDto subscriptionTypeDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(subscriptionTypeService.create(subscriptionTypeDto));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SubscriptionType> update(@PathVariable Long id, @Valid @RequestBody SubscriptionTypeDto subscriptionTypeDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(subscriptionTypeService.update(id, subscriptionTypeDto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        subscriptionTypeService.delete(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
